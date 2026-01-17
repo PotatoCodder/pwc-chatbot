@@ -5,7 +5,11 @@ import { Send, Bot, User, Loader2, Settings, X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChatContext } from './chatContext';
 
-export default function ChatComponent({ initialMessage }) {
+interface ChatComponentProps {
+  initialMessage: string;
+}
+
+export default function ChatComponent({ initialMessage }: ChatComponentProps) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -17,7 +21,7 @@ export default function ChatComponent({ initialMessage }) {
   const [showSettings, setShowSettings] = useState(false);
   
   // Customizable settings
-  const [botName, setBotName] = useState('PWC Davao AI Assistant');
+  const [botName, setBotName] = useState('YXA');
   const [botSubtitle, setBotSubtitle] = useState('Always here to help');
   const [userName, setUserName] = useState('You');
   const [botIcon, setBotIcon] = useState('🤖');
@@ -30,8 +34,8 @@ export default function ChatComponent({ initialMessage }) {
   const [tempBotIcon, setTempBotIcon] = useState(botIcon);
   const [tempUserIcon, setTempUserIcon] = useState(userIcon);
   
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const { setInitialMessage } = useChatContext();
   const hasProcessedInitialMessage = useRef(false);
 
@@ -51,7 +55,7 @@ export default function ChatComponent({ initialMessage }) {
     }
   }, [initialMessage]);
 
-  const handleSendMessage = async (messageText) => {
+  const handleSendMessage = async (messageText: string) => {
     if (!messageText.trim() || isLoading) return;
 
     const userMessage = messageText.trim();
@@ -89,7 +93,7 @@ export default function ChatComponent({ initialMessage }) {
     }
   };
 
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -115,49 +119,62 @@ export default function ChatComponent({ initialMessage }) {
   };
 
   return (
-    <div className="flex flex-col h-[550px] w-full max-w-md mx-auto bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+    <div className="flex flex-col h-[600px] max-w-3xl mx-auto bg-white rounded-2xl border-2 border-gray-200 shadow-lg overflow-hidden">
       
-      {/* Header - PWC Red Theme */}
-      <div className="px-4 py-3 bg-[#C8102E] text-white">
+      {/* Chat Header */}
+      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded bg-white/20 flex items-center justify-center">
-              <Bot className="w-4 h-4" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-red-700 flex items-center justify-center text-2xl">
+              {botIcon}
             </div>
             <div>
-              <h3 className="font-bold text-sm">{botName}</h3>
-              <p className="text-xs text-white/80">{botSubtitle}</p>
+              <h3 className="font-bold text-gray-900">{botName}</h3>
+              <p className="text-sm text-gray-500">{botSubtitle}</p>
             </div>
           </div>
           <button
             onClick={() => setShowSettings(true)}
-            className="p-1.5 rounded hover:bg-white/20 transition-colors"
-            aria-label="Settings"
+            className="p-2 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            <Settings className="w-4 h-4" />
+            <Settings className="w-5 h-5 text-gray-600" />
           </button>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
         <AnimatePresence>
           {messages.map((message, index) => (
             <motion.div
               key={index}
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`flex gap-2 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+              transition={{ duration: 0.3 }}
+              className={`flex gap-3 ${
+                message.role === 'user' ? 'flex-row-reverse' : 'flex-row'
+              }`}
             >
               {/* Avatar */}
-              <div className={`w-6 h-6 rounded flex items-center justify-center text-xs ${message.role === 'user' ? 'bg-gray-700' : 'bg-[#C8102E]'} text-white`}>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-lg ${
+                  message.role === 'user'
+                    ? 'bg-gray-700'
+                    : 'bg-red-700'
+                }`}
+              >
                 {message.role === 'user' ? userIcon : botIcon}
               </div>
 
               {/* Message Bubble */}
-              <div className={`max-w-[85%] px-3 py-2 rounded-lg ${message.role === 'user' ? 'bg-[#C8102E] text-white' : 'bg-white border border-gray-200 text-gray-800'}`}>
-                <p className="text-xs leading-relaxed whitespace-pre-wrap">
+              <div
+                className={`max-w-[70%] px-4 py-3 rounded-2xl ${
+                  message.role === 'user'
+                    ? 'bg-red-700 text-white rounded-tr-none'
+                    : 'bg-white border border-gray-200 text-gray-900 rounded-tl-none'
+                }`}
+              >
+                <p className="text-sm leading-relaxed whitespace-pre-wrap">
                   {message.content}
                 </p>
               </div>
@@ -167,28 +184,25 @@ export default function ChatComponent({ initialMessage }) {
 
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="flex gap-2">
-            <div className="w-6 h-6 rounded bg-[#C8102E] flex items-center justify-center text-xs text-white">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex gap-3"
+          >
+            <div className="w-8 h-8 rounded-full bg-red-700 flex items-center justify-center text-lg">
               {botIcon}
             </div>
-            <div className="bg-white border border-gray-200 px-3 py-2 rounded-lg">
-              <div className="flex items-center gap-1.5">
-                <div className="flex space-x-0.5">
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                </div>
-                <span className="text-xs text-gray-500">Typing...</span>
-              </div>
+            <div className="bg-white border border-gray-200 px-4 py-3 rounded-2xl rounded-tl-none">
+              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
             </div>
-          </div>
+          </motion.div>
         )}
 
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-3 border-t border-gray-200 bg-white">
+      <div className="p-4 border-t border-gray-200 bg-white">
         <div className="flex gap-2">
           <input
             ref={inputRef}
@@ -196,28 +210,27 @@ export default function ChatComponent({ initialMessage }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about PWC Davao..."
+            placeholder="Ask me anything about PWC Davao..."
             disabled={isLoading}
-            className="flex-1 px-3 py-2 text-sm rounded border border-gray-300 focus:outline-none focus:border-[#C8102E] focus:ring-1 focus:ring-[#C8102E] disabled:bg-gray-100"
+            className="flex-1 px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:border-red-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
-            className="px-3 py-2 rounded bg-[#C8102E] text-white hover:bg-[#A80D26] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-4 py-3 rounded-xl bg-red-700 text-white hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {isLoading ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+              <Loader2 className="w-5 h-5 animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             )}
-          </button>
-        </div>
-        <div className="mt-1 text-[10px] text-gray-400 text-center">
-          Press Enter to send
+          </motion.button>
         </div>
       </div>
 
-      {/* Settings Modal - Flat Design */}
+      {/* Settings Modal */}
       <AnimatePresence>
         {showSettings && (
           <>
@@ -226,131 +239,108 @@ export default function ChatComponent({ initialMessage }) {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={handleCancelSettings}
-              className="fixed inset-0 bg-black/30 z-50"
+              className="fixed inset-0 bg-black/50 z-50"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white rounded-lg border border-gray-200 shadow-lg z-50 overflow-hidden"
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white rounded-2xl shadow-2xl z-50 p-6"
             >
-              {/* Modal Header */}
-              <div className="px-4 py-3 bg-[#C8102E] text-white">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-bold text-sm">Customize Chat</h3>
-                  <button
-                    onClick={handleCancelSettings}
-                    className="p-1 rounded hover:bg-white/20"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Settings Content */}
-              <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-                {/* Bot Settings */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
-                    <div className="w-6 h-6 rounded bg-[#C8102E] flex items-center justify-center text-white">
-                      {tempBotIcon}
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-900">Bot Settings</h4>
-                      <p className="text-xs text-gray-500">AI Assistant</p>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Bot Name
-                    </label>
-                    <input
-                      type="text"
-                      value={tempBotName}
-                      onChange={(e) => setTempBotName(e.target.value)}
-                      className="w-full px-3 py-1.5 text-sm rounded border border-gray-300 focus:outline-none focus:border-[#C8102E]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Bot Subtitle
-                    </label>
-                    <input
-                      type="text"
-                      value={tempBotSubtitle}
-                      onChange={(e) => setTempBotSubtitle(e.target.value)}
-                      className="w-full px-3 py-1.5 text-sm rounded border border-gray-300 focus:outline-none focus:border-[#C8102E]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Bot Emoji
-                    </label>
-                    <input
-                      type="text"
-                      value={tempBotIcon}
-                      onChange={(e) => setTempBotIcon(e.target.value)}
-                      maxLength={2}
-                      className="w-full px-3 py-1.5 text-xl text-center rounded border border-gray-300 focus:outline-none focus:border-[#C8102E]"
-                    />
-                  </div>
-                </div>
-
-                {/* User Settings */}
-                <div className="space-y-3 pt-3 border-t border-gray-100">
-                  <div className="flex items-center gap-2 pb-2">
-                    <div className="w-6 h-6 rounded bg-gray-700 flex items-center justify-center text-white">
-                      {tempUserIcon}
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-sm text-gray-900">Your Settings</h4>
-                      <p className="text-xs text-gray-500">User Profile</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Your Name
-                    </label>
-                    <input
-                      type="text"
-                      value={tempUserName}
-                      onChange={(e) => setTempUserName(e.target.value)}
-                      className="w-full px-3 py-1.5 text-sm rounded border border-gray-300 focus:outline-none focus:border-[#C8102E]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Your Emoji
-                    </label>
-                    <input
-                      type="text"
-                      value={tempUserIcon}
-                      onChange={(e) => setTempUserIcon(e.target.value)}
-                      maxLength={2}
-                      className="w-full px-3 py-1.5 text-xl text-center rounded border border-gray-300 focus:outline-none focus:border-[#C8102E]"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex gap-2">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Customize Chat</h3>
                 <button
                   onClick={handleCancelSettings}
-                  className="flex-1 px-3 py-2 text-sm rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+
+              <div className="space-y-4 mb-6">
+                {/* Bot Settings */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Bot Name
+                  </label>
+                  <input
+                    type="text"
+                    value={tempBotName}
+                    onChange={(e) => setTempBotName(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-red-700"
+                    placeholder="PWC Davao AI Assistant"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Bot Subtitle
+                  </label>
+                  <input
+                    type="text"
+                    value={tempBotSubtitle}
+                    onChange={(e) => setTempBotSubtitle(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-red-700"
+                    placeholder="Always here to help"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Bot Icon (Emoji)
+                  </label>
+                  <input
+                    type="text"
+                    value={tempBotIcon}
+                    onChange={(e) => setTempBotIcon(e.target.value)}
+                    maxLength={2}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-red-700 text-2xl"
+                    placeholder="🤖"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Use any emoji</p>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={tempUserName}
+                    onChange={(e) => setTempUserName(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-red-700"
+                    placeholder="You"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Your Icon (Emoji)
+                  </label>
+                  <input
+                    type="text"
+                    value={tempUserIcon}
+                    onChange={(e) => setTempUserIcon(e.target.value)}
+                    maxLength={2}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:border-red-700 text-2xl"
+                    placeholder="👤"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Use any emoji</p>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleCancelSettings}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveSettings}
-                  className="flex-1 px-3 py-2 text-sm rounded bg-[#C8102E] text-white hover:bg-[#A80D26] transition-colors flex items-center justify-center gap-1"
+                  className="flex-1 px-4 py-3 bg-red-700 text-white rounded-xl font-semibold hover:bg-red-800 transition-colors flex items-center justify-center gap-2"
                 >
-                  <Check className="w-3 h-3" />
+                  <Check className="w-5 h-5" />
                   Save
                 </button>
               </div>

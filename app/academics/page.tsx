@@ -187,7 +187,7 @@ export default function AcademicsPage() {
     {
       icon: GraduationCap,
       title: 'Ladderized Programs',
-      description: 'Diploma programs that lead to Bachelor's degrees'
+      description: "Diploma programs that lead to Bachelor's degrees"
     }
   ];
 

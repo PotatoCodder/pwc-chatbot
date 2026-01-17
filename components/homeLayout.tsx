@@ -1,7 +1,11 @@
 import { ChatProvider } from './chatContext';
 import FloatingChatBubble from './floatingChatBubble';
 
-export default function HomeLayout({ children }) {
+interface type {
+  children: React.ReactNode;
+}
+
+export default function HomeLayout({ children }: type) {
   return (
     <ChatProvider>
       {children}

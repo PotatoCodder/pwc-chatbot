@@ -2,13 +2,21 @@
 
 import { createContext, useContext, useState } from 'react';
 
-const ChatContext = createContext();
+interface ChatContextType {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  initialMessage: string;
+  setInitialMessage: (message: string) => void;
+  openChatWithMessage: (message: string) => void;
+}
 
-export function ChatProvider({ children }) {
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
+
+export function ChatProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialMessage, setInitialMessage] = useState('');
 
-  const openChatWithMessage = (message) => {
+  const openChatWithMessage = (message: string) => {
     setInitialMessage(message);
     setIsOpen(true);
   };
@@ -20,7 +28,7 @@ export function ChatProvider({ children }) {
   );
 }
 
-export const useChatContext = () => {
+export const useChatContext = (): ChatContextType => {
   const context = useContext(ChatContext);
   if (!context) {
     throw new Error('useChatContext must be used within ChatProvider');

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Menu, X, GraduationCap, Phone, School, ChevronRight, Map } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,7 +18,7 @@ export default function PWCNavbar() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const isActive = (path) => pathname === path;
+  const isActive = (path: string): boolean => pathname === path;
 
   return (
     <>
@@ -133,7 +133,22 @@ export default function PWCNavbar() {
   );
 }
 
-function NavItem({ icon, label, href, active }) {
+interface NavItemProps {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  active: boolean;
+}
+
+interface MobileNavItemProps {
+  label: string;
+  icon: React.ReactNode;
+  href: string;
+  onClick: () => void;
+  active: boolean;
+}
+
+function NavItem({ icon, label, href, active }: NavItemProps) {
   return (
     <Link href={href}>
       <button className={`group relative flex items-center gap-2 px-4 lg:px-5 py-2.5 font-medium rounded-xl active:scale-95 transition-all duration-200 ${
@@ -151,7 +166,7 @@ function NavItem({ icon, label, href, active }) {
   );
 }
 
-function MobileNavItem({ label, icon, href, onClick, active }) {
+function MobileNavItem({ label, icon, href, onClick, active }: MobileNavItemProps) {
   return (
     <Link href={href}>
       <button
